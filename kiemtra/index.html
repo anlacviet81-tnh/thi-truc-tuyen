@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Kiểm tra trình duyệt</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f4f6fb;color:#1a2233}
+  .wrap{max-width:640px;margin:0 auto;padding:16px}
+  h1{font-size:20px;margin:8px 0 4px;color:#0b4ea2}
+  p.note{font-size:14px;color:#555;margin:0 0 12px}
+  .big{background:#0b4ea2;color:#fff;border-radius:12px;padding:14px;font-size:18px;font-weight:700;text-align:center;margin-bottom:12px}
+  .row{background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .k{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.03em}
+  .v{font-family:ui-monospace,Consolas,monospace;font-size:13px;word-break:break-all;white-space:pre-wrap;margin-top:2px}
+  button{width:100%;padding:12px;font-size:16px;border:0;border-radius:10px;background:#d4252c;color:#fff;font-weight:700;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Trang kiểm tra trình duyệt</h1>
+  <p class="note">Chụp màn hình toàn bộ trang này (cuộn xuống nếu dài) và gửi lại cho người quản trị. Trang không thu thập hay gửi dữ liệu đi đâu.</p>
+  <div class="big" id="nguon">Đang kiểm tra…</div>
+  <div id="list"></div>
+  <button id="copy">Sao chép toàn bộ thông tin</button>
+</div>
+<script>
+(function(){
+  var ua = navigator.userAgent || '';
+  var w = window;
+  function has(path){ try{ return path.split('.').reduce(function(o,k){return o&&o[k];}, w) ? 'có' : 'không'; }catch(e){ return 'lỗi'; } }
+  var bridges = [];
+  ['webkit.messageHandlers','ReactNativeWebView','flutter_inappwebview','Android','AndroidBridge','JSBridge','jsBridge','WebViewJavascriptBridge','NativeBridge','Tammi','tammi','TammiBridge','ViettelBridge','MyViettel','zalo','ZaloJavaScriptInterface','__tammi']
+    .forEach(function(p){ if(has(p)==='có') bridges.push(p); });
+  var custom = [];
+  try { Object.getOwnPropertyNames(w).forEach(function(k){ if(/tammi|viettel|bridge|native|app/i.test(k) && !/^on/.test(k)) custom.push(k); }); } catch(e){}
+  var info = [
+    ['User-Agent', ua],
+    ['Nguồn trỏ đến (referrer)', document.referrer || '(trống)'],
+    ['Địa chỉ trang', location.href],
+    ['Cầu nối ứng dụng phát hiện được', bridges.join(', ') || '(không có)'],
+    ['Biến toàn cục đáng chú ý', custom.join(', ') || '(không có)'],
+    ['navigator.standalone', String(navigator.standalone)],
+    ['Ngôn ngữ', navigator.language],
+    ['Màn hình', screen.width + '×' + screen.height + ' @' + (window.devicePixelRatio||1)],
+    ['Cookie bật', String(navigator.cookieEnabled)],
+    ['Thời gian', new Date().toString()]
+  ];
+  var list = document.getElementById('list');
+  info.forEach(function(r){
+    var d = document.createElement('div'); d.className='row';
+    d.innerHTML = '<div class="k"></div><div class="v"></div>';
+    d.children[0].textContent = r[0]; d.children[1].textContent = r[1];
+    list.appendChild(d);
+  });
+  var guess = /tammi/i.test(ua) ? 'Có vẻ đang mở trong Tammi' :
+    /Zalo/i.test(ua) ? 'Đang mở trong Zalo' :
+    /FBAN|FBAV|FB_IAB/i.test(ua) ? 'Đang mở trong Facebook/Messenger' :
+    /; wv\)|WebView/i.test(ua) ? 'Đang mở trong một ứng dụng (WebView)' :
+    /CriOS|Chrome/i.test(ua) ? 'Đang mở bằng Chrome' :
+    /Safari/i.test(ua) ? 'Đang mở bằng Safari' : 'Chưa xác định';
+  document.getElementById('nguon').textContent = guess;
+  document.getElementById('copy').onclick = function(){
+    var t = info.map(function(r){return r[0]+': '+r[1];}).join('\n');
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ alert('Đã sao chép'); }, function(){ prompt('Sao chép nội dung này:', t); });
+  };
+})();
+</script>
+</body>
+</html>
