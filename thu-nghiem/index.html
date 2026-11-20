@@ -69,8 +69,10 @@
   var ua = navigator.userAgent || '', q = new URLSearchParams(location.search);
   var gl = (q.get('gialap') || '').toLowerCase(); // thu nghiem: ?gialap=zalo | facebook
   var app = null;
-  if (gl === 'zalo' || /Zalo/i.test(ua) || window.ZaloJavaScriptInterface || q.get('utm_source') === 'zalo' || q.get('zarsrc')) app = 'Zalo';
-  else if (gl === 'facebook' || /FBAN|FBAV|FB_IAB|FBIOS|FB4A|Messenger/i.test(ua) || q.get('fbclid')) app = 'Facebook / Messenger';
+  // chi dua vao dau hieu cua trinh duyet trong app (UA / cau noi), KHONG dua vao duoi link (utm_source, fbclid...)
+  // vi link chep tu Zalo/Facebook dan sang Chrome van mang duoi do -> se chan nham
+  if (gl === 'zalo' || /Zalo/i.test(ua) || window.ZaloJavaScriptInterface) app = 'Zalo';
+  else if (gl === 'facebook' || /FBAN|FBAV|FB_IAB|FBIOS|FB4A|Messenger/i.test(ua)) app = 'Facebook / Messenger';
   else if (/Instagram/i.test(ua)) app = 'Instagram';
   else if (/musical_ly|BytedanceWebview|TikTok/i.test(ua)) app = 'TikTok';
   if (!app) return;
